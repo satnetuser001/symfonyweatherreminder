@@ -1,0 +1,54 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: 'Symfony Weather Reminder API'
+            description: 'API for managing weather reminders and user accounts.'
+            version: '1.0.0'
+        servers:
+            - { url: 'https://api.symfonyweatherreminder.mooo.com', description: 'Deployed API Server' }
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+                    description: 'Enter JWT Bearer token **_only_**'
+        security:
+            - Bearer: []
+        tags:
+            - { name: 'Authentication', description: 'User login and JWT token management' }
+            - { name: 'Users', description: 'User management operations' }
+            - { name: 'Weather', description: 'Weather data retrieval and caching' }
+            - { name: 'Subscriptions', description: 'User subscriptions to weather alerts' }
+
+        paths:
+            /api/login_check:
+                post:
+                    tags: ["Authentication"]
+                    summary: Obtain JWT token
+                    security: []
+                    requestBody:
+                        description: 'User credentials for authentication'
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        username: {type: string, format: email, example: test@example.com}
+                                        password: {type: string, example: password123}
+                    responses:
+                        '200':
+                            description: 'JWT token issued successfully'
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token: {type: string, description: 'JWT Access Token'}
+                        '401':
+                            description: 'Invalid credentials'
+
+    areas:
+        path_patterns:
+            - ^/api(?!/doc$)

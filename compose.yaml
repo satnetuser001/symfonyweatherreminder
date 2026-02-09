@@ -1,0 +1,264 @@
+services:
+
+  cli:
+    container_name: cli
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-}
+        COMPOSER_VERSION: ${COMPOSER_VERSION:+ --version=${COMPOSER_VERSION}}
+        NODE_VERSION: ${NODE_VERSION:-lts}
+    user: ${CUID:-0}:${CGID:-0}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - type: bind
+        source: ./project
+        target: /project
+    networks:
+      - php-docker-dev-env
+
+  php-fpm:
+    container_name: php-fpm
+    build:
+      context: ./php-fpm
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:+${PHP_VERSION}-}
+        XDEBUG_VERSION: ${XDEBUG_VERSION:+-${XDEBUG_VERSION}}
+    user: ${CUID:-0}:${CGID:-0}
+    restart: unless-stopped
+    environment:
+      PHP_IDE_CONFIG: "serverName=${IDE_SERVER_NAME:-php-docker-dev-env}"
+    volumes:
+      - type: bind
+        source: ./project
+        target: /project
+      - type: bind
+        source: ./xdebug/xdebug.ini
+        target: /usr/local/etc/php/conf.d/xdebug.ini
+      - type: bind
+        source: ./xdebug/logs
+        target: /xdebug-logs
+    networks:
+      - php-docker-dev-env
+    extra_hosts:
+      host.docker.internal: host-gateway
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - php-fpm
+    volumes:
+      # Symfony project
+      - type: bind
+        source: ./project
+        target: /project
+      # nginx configs
+      - type: bind
+        source: ./nginx/conf.d
+        target: /etc/nginx/conf.d
+      # ACME challenge directory
+      - type: bind
+        source: ./nginx/certbot
+        target: /var/www/certbot
+      # Let's Encrypt certificates
+      - type: bind
+        source: ./nginx/ssl-certificates
+        target: /etc/letsencrypt
+        read_only: true
+    networks:
+      - php-docker-dev-env
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0.44-debian
+    restart: unless-stopped
+    ports:
+      - "8306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql-root-password
+      MYSQL_DATABASE: project
+      TZ: ${TZ}
+    secrets:
+      - mysql-root-password
+    volumes:
+      - php-docker-dev-env-mysql-data:/var/lib/mysql
+    networks:
+      - php-docker-dev-env
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin:latest
+    restart: unless-stopped
+    ports:
+      - "8090:80"
+    environment:
+      PMA_HOST: mysql
+      TZ: ${TZ}
+    depends_on:
+      - mysql
+    networks:
+      - php-docker-dev-env
+
+  redis:
+    container_name: redis
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    networks:
+      - php-docker-dev-env
+
+  mailpit:
+    container_name: mailpit
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP server
+    networks:
+      - php-docker-dev-env
+
+  scheduler:
+    container_name: scheduler
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:+${PHP_VERSION}-}
+    user: ${CUID:-0}:${CGID:-0}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+    command: php bin/console messenger:consume scheduler_weather_sync -vv
+    depends_on:
+      - redis
+      - mysql
+    volumes:
+      - type: bind
+        source: ./project
+        target: /project
+    networks:
+      - php-docker-dev-env
+
+  worker-sync-weather:
+    container_name: worker-sync-weather
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:+${PHP_VERSION}-}
+    user: ${CUID:-0}:${CGID:-0}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+    command: php bin/console messenger:consume sync_weather -vv
+    depends_on:
+      - redis
+    volumes:
+      - type: bind
+        source: ./project
+        target: /project
+    networks:
+      - php-docker-dev-env
+
+  worker-detect-triggers:
+    container_name: worker-detect-triggers
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:+${PHP_VERSION}-}
+    user: ${CUID:-0}:${CGID:-0}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+    command: php bin/console messenger:consume detect_triggers -vv
+    depends_on:
+      - redis
+    volumes:
+      - type: bind
+        source: ./project
+        target: /project
+    networks:
+      - php-docker-dev-env
+
+  worker-notifications:
+    container_name: worker-notifications
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:+${PHP_VERSION}-}
+    user: ${CUID:-0}:${CGID:-0}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+    command: php bin/console messenger:consume notifications -vv
+    depends_on:
+      - redis
+    volumes:
+      - type: bind
+        source: ./project
+        target: /project
+    networks:
+      - php-docker-dev-env
+
+  worker-emails:
+    container_name: worker-emails
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:+${PHP_VERSION}-}
+    user: ${CUID:-0}:${CGID:-0}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+    command: php bin/console messenger:consume emails -vv
+    depends_on:
+      - redis
+    volumes:
+      - type: bind
+        source: ./project
+        target: /project
+    networks:
+      - php-docker-dev-env
+
+  certbot:
+    container_name: certbot
+    build:
+      context: ./certbot
+      dockerfile: Dockerfile
+    profiles:
+      - certbot
+    volumes:
+      # ACME challenge directory
+      - type: bind
+        source: ./nginx/certbot
+        target: /var/www/certbot
+      # Let's Encrypt certificates
+      - type: bind
+        source: ./nginx/ssl-certificates
+        target: /etc/letsencrypt
+    networks:
+      - php-docker-dev-env
+
+secrets:
+  mysql-root-password:
+    file: ./secrets/mysql_root_password.txt
+
+volumes:
+  php-docker-dev-env-mysql-data:
+    name: php-docker-dev-env-mysql-data
+
+networks:
+  php-docker-dev-env:
+    name: php-docker-dev-env
+    driver: bridge

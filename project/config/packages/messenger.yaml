@@ -1,0 +1,43 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            sync_weather:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%/sync_weather'
+                retry_strategy:
+                    max_retries: 3
+                    multiplier: 2
+
+            detect_triggers:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%/detect_triggers'
+                retry_strategy:
+                    max_retries: 3
+
+            notifications:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%/notifications'
+
+            emails:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%/emails'
+                retry_strategy:
+                    max_retries: 5
+                    delay: 1000
+
+            failed: 'doctrine://default?queue_name=failed'
+
+        default_bus: messenger.bus.default
+        buses:
+            messenger.bus.default: []
+
+        routing:
+            # Pipeline steps
+            'App\Message\SyncWeatherCacheMessage': sync_weather
+            'App\Message\UpdateCityWeatherMessage': sync_weather
+            'App\Message\DetectTriggersMessage': detect_triggers
+            'App\Message\CreateNotificationMessage': notifications
+            'App\Message\SendEmailNotificationMessage': emails
+
+            # Internal Symfony messages
+            'Symfony\Component\Mailer\Messenger\SendEmailMessage': emails
+            'Symfony\Component\Notifier\Message\ChatMessage': emails
+            'Symfony\Component\Notifier\Message\SmsMessage': emails
