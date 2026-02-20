@@ -108,10 +108,16 @@ services:
     networks:
       - php-docker-dev-env
 
-  redis:
-    container_name: redis
-    image: redis:7.4-alpine
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
     restart: unless-stopped
+    ports:
+#      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI (standard)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     networks:
       - php-docker-dev-env
 
@@ -121,7 +127,7 @@ services:
     restart: unless-stopped
     ports:
       - "8025:8025" # Web UI
-      - "1025:1025" # SMTP server
+#      - "1025:1025" # SMTP server
     networks:
       - php-docker-dev-env
 
@@ -138,7 +144,7 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume scheduler_weather_sync -vv
     depends_on:
-      - redis
+      - rabbitmq
       - mysql
     volumes:
       - type: bind
@@ -160,7 +166,7 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume sync_weather -vv
     depends_on:
-      - redis
+      - rabbitmq
     volumes:
       - type: bind
         source: ./project
@@ -181,7 +187,7 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume detect_triggers -vv
     depends_on:
-      - redis
+      - rabbitmq
     volumes:
       - type: bind
         source: ./project
@@ -202,7 +208,7 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume notifications -vv
     depends_on:
-      - redis
+      - rabbitmq
     volumes:
       - type: bind
         source: ./project
@@ -223,7 +229,7 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume emails -vv
     depends_on:
-      - redis
+      - rabbitmq
     volumes:
       - type: bind
         source: ./project
