@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y \
     php${PHP_VERSION}-common \
     php${PHP_VERSION}-mysql \
     php${PHP_VERSION}-pcov \
-    php${PHP_VERSION}-redis
+    php${PHP_VERSION}-amqp
 
 # build argument for Composer version
 ARG COMPOSER_VERSION
