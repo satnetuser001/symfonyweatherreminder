@@ -8,11 +8,16 @@ FROM php:${PHP_VERSION}fpm
 RUN apt-get update && apt-get install -y \
     git \
     libicu-dev \
+    librabbitmq-dev \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql intl
+
+# Install AMQP extension (RabbitMQ)
+RUN pecl install amqp \
+    && docker-php-ext-enable amqp
 
 # build argument for Xdebug version
 ARG XDEBUG_VERSION
