@@ -10,6 +10,9 @@ RUN apk add --no-cache icu-dev
 # Install core PHP extensions
 RUN docker-php-ext-install intl pdo_mysql
 
+# AMQP runtime library (must stay installed for amqp.so to load)
+RUN apk add --no-cache rabbitmq-c
+
 # Install AMQP extension (RabbitMQ)
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS rabbitmq-c-dev \
     && pecl install amqp \
