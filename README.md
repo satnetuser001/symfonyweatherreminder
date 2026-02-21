@@ -11,7 +11,9 @@ https://www.symfonyweatherreminder.mooo.com/api/doc
 #### Mailpit web UI
 http://176.117.78.133:8025/
 #### RabbitMQ web UI
-http://176.117.78.133:15672/
+http://176.117.78.133:15672/ (user: app, password: 1077)
+#### phpMyAdmin
+http://176.117.78.133:8090/ (user: root, password: 1077)
 
 ## System requirements:
 linux kernel version 6.17.0-12-generic  
@@ -32,7 +34,7 @@ Asynchronous message processing via Symfony Messenger with RabbitMQ
 **Symfony Weather Reminder** is a weather-fetching gateway providing data caching, user subscription management, and automated alerts triggered by temperature thresholds.  
 This application operates entirely within a Docker container environment and is based on the [php-docker-dev-env](https://github.com/satnetuser001/php-docker-dev-env) GitHub repository.
 #### Web UI
-The web interface provides a high-level project overview, direct links to the interactive [Swagger (OpenAPI) documentation](https://www.symfonyweatherreminder.mooo.com/api/doc), and access to the [Mailpit](http://176.117.78.133:8025/) and [RabbitMQ](http://176.117.78.133:15672/) service containers.
+The web interface provides a high-level project overview, direct links to the interactive [Swagger (OpenAPI) documentation](https://www.symfonyweatherreminder.mooo.com/api/doc), and access to the [Mailpit](http://176.117.78.133:8025/), [RabbitMQ](http://176.117.78.133:15672/) and [phpMyAdmin](http://176.117.78.133:8090/) service containers.
 #### API
 The core functionality of the application is available via API endpoints. Interactive documentation and testing are available at [Swagger UI](https://www.symfonyweatherreminder.mooo.com/api/doc).
 *   **Authentication & Users**
@@ -99,10 +101,6 @@ Enter in cli container
 ```bash
 docker exec -it cli bash
 ```
-Install project dependencies
-```bash
-composer install
-```
 Create .env.local
 ```bash
 cp .env.local.example .env.local
@@ -110,6 +108,10 @@ cp .env.local.example .env.local
 Generate APP_SECRET in .env.local
 ```bash
 ./generate-app-secret.sh
+```
+Install project dependencies
+```bash
+composer install
 ```
 Generate JWT Keypair
 ```bash
