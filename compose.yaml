@@ -116,7 +116,7 @@ services:
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: app
-      RABBITMQ_DEFAULT_PASS: 1077
+      RABBITMQ_DEFAULT_PASS: 1077 # image doesn't support secrets
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
       interval: 5s
