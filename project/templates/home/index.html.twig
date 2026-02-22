@@ -38,6 +38,8 @@
         <div class="actions">
             <a href="{{ path('app.swagger_ui') }}" class="btn btn-primary">Swagger API Docs</a>
             <a href="http://176.117.78.133:8025/" target="_blank" class="btn btn-secondary">Mailpit Interface</a>
+            <a href="http://176.117.78.133:15672/" target="_blank" class="btn btn-secondary">RabbitMQ UI</a>
+            <a href="http://176.117.78.133:8090/" target="_blank" class="btn btn-secondary">phpMyAdmin</a>
         </div>
     </header>
 
@@ -68,7 +70,7 @@
             </div>
             <div class="card">
                 <h4>4. Asynchronous Pipeline</h4>
-                <p>Decoupled logic using <strong>Symfony Messenger</strong> and <strong>Redis</strong>. Distributed across specialized worker containers.</p>
+                <p>Decoupled logic using <strong>Symfony Messenger</strong> and <strong>RabbitMQ</strong>. Distributed across specialized worker containers.</p>
             </div>
         </div>
     </section>

@@ -108,10 +108,20 @@ services:
     networks:
       - php-docker-dev-env
 
-  redis:
-    container_name: redis
-    image: redis:7.4-alpine
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
     restart: unless-stopped
+    ports:
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: app
+      RABBITMQ_DEFAULT_PASS: 1077 # image doesn't support secrets
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
     networks:
       - php-docker-dev-env
 
@@ -120,8 +130,7 @@ services:
     image: axllent/mailpit:latest
     restart: unless-stopped
     ports:
-      - "8025:8025" # Web UI
-      - "1025:1025" # SMTP server
+      - "8025:8025"
     networks:
       - php-docker-dev-env
 
@@ -138,8 +147,10 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume scheduler_weather_sync -vv
     depends_on:
-      - redis
-      - mysql
+      rabbitmq:
+        condition: service_healthy
+      mysql:
+        condition: service_started
     volumes:
       - type: bind
         source: ./project
@@ -160,7 +171,8 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume sync_weather -vv
     depends_on:
-      - redis
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - type: bind
         source: ./project
@@ -181,7 +193,8 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume detect_triggers -vv
     depends_on:
-      - redis
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - type: bind
         source: ./project
@@ -202,7 +215,8 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume notifications -vv
     depends_on:
-      - redis
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - type: bind
         source: ./project
@@ -223,7 +237,8 @@ services:
       TZ: ${TZ}
     command: php bin/console messenger:consume emails -vv
     depends_on:
-      - redis
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - type: bind
         source: ./project
