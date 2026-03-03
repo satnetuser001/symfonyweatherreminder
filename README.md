@@ -1,19 +1,5 @@
-# 16-Add Background Task Queues
-#### Enhance the application by incorporating background task queues for sending notifications and fetching weather updates.
-
-## Links
-#### URL of the deployed application
-https://symfonyweatherreminder.mooo.com  
-https://www.symfonyweatherreminder.mooo.com  
-https://api.symfonyweatherreminder.mooo.com
-#### Swagger (OpenAPI) documentation
-https://www.symfonyweatherreminder.mooo.com/api/doc
-#### Mailpit web UI
-http://176.117.78.133:8025/
-#### RabbitMQ web UI
-http://176.117.78.133:15672/ (user: app, password: 1077)
-#### phpMyAdmin
-http://176.117.78.133:8090/ (user: root, password: 1077)
+# Symfony Weather Reminder
+#### Weather-fetching gateway providing data caching, user subscription management, and automated alerts triggered by temperature thresholds in Docker containers.
 
 ## System requirements:
 linux kernel version 6.17.0-12-generic  
@@ -34,9 +20,9 @@ Asynchronous message processing via Symfony Messenger with RabbitMQ
 **Symfony Weather Reminder** is a weather-fetching gateway providing data caching, user subscription management, and automated alerts triggered by temperature thresholds.  
 This application operates entirely within a Docker container environment and is based on the [php-docker-dev-env](https://github.com/satnetuser001/php-docker-dev-env) GitHub repository.
 #### Web UI
-The web interface provides a high-level project overview, direct links to the interactive [Swagger (OpenAPI) documentation](https://www.symfonyweatherreminder.mooo.com/api/doc), and access to the [Mailpit](http://176.117.78.133:8025/), [RabbitMQ](http://176.117.78.133:15672/) and [phpMyAdmin](http://176.117.78.133:8090/) service containers.
+The web interface provides a high-level project overview, direct links to the interactive [Swagger (OpenAPI) documentation](https://you-domain-name/api/doc), and access to the [Mailpit](http://you-domain-name:8025/), [RabbitMQ](http://you-domain-name:15672/) (user: app, password: 1077) and [phpMyAdmin](http://you-domain-name:8090/) (user: root, password: 1077) service containers.
 #### API
-The core functionality of the application is available via API endpoints. Interactive documentation and testing are available at [Swagger UI](https://www.symfonyweatherreminder.mooo.com/api/doc).
+The core functionality of the application is available via API endpoints. Interactive documentation and testing are available at [Swagger UI](https://you-domain-name/api/doc).
 *   **Authentication & Users**
     *   `POST /api/v1/users`: Register a new user with email and password.
     *   `POST /api/login_check`: Exchange credentials for a JWT Bearer token.
