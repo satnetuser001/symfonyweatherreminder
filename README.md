@@ -57,7 +57,7 @@ The core alerting logic is decoupled from the web server and executed through an
 *   **Step 3: Detect (`worker-detect-triggers` container):**
     This worker reacts to the "data updated" signal. It compares the new temperature against each user's `Subscription` settings. If a threshold is crossed for the first time (according to the **Stateful Alerting** logic), the worker sets the corresponding `isTriggered` flag to `true` and dispatches a message to **RabbitMQ** to request a notification for the user.
 *   **Step 4: Notify & Email (`worker-notifications` & `worker-emails` containers):**
-    Upon receiving a notification request, the `worker-notifications` container first persists a permanent record in the database via the `Notification` entity to maintain the user's alert history. Only after the record is saved, a final task is dispatched to the `worker-emails` container, which executes the delivery via **Symfony Mailer**. All outgoing messages are captured and can be inspected through the [Mailpit](http://176.117.78.133:8025/) web interface.
+    Upon receiving a notification request, the `worker-notifications` container first persists a permanent record in the database via the `Notification` entity to maintain the user's alert history. Only after the record is saved, a final task is dispatched to the `worker-emails` container, which executes the delivery via **Symfony Mailer**. All outgoing messages are captured and can be inspected through the [Mailpit](http://you-domain-name:8025/) web interface.
 
 ## Initial Setup
 Clone the repository
