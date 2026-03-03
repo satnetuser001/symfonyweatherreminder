@@ -62,13 +62,9 @@ The core alerting logic is decoupled from the web server and executed through an
 ## Initial Setup
 Clone the repository
 ```bash
-git clone git@git.foxminded.ua:foxstudent108512/task-16-add-background-task-queues.git symfonyweatherreminder.mooo.com
+git clone https://github.com/satnetuser001/symfonyweatherreminder.git symfonyweatherreminder
 ```
-or
-```bash
-git clone -b dev git@git.foxminded.ua:foxstudent108512/task-16-add-background-task-queues.git symfonyweatherreminder.mooo.com
-```
-Navigate to the `symfonyweatherreminder.mooo.com` directory and run Docker Compose passing the Current User ID and the Current Group ID
+Navigate to the `symfonyweatherreminder` directory and run Docker Compose passing the Current User ID and the Current Group ID
 ```bash
 CUID=$(id -u) CGID=$(id -g) docker compose up -d
 ```
